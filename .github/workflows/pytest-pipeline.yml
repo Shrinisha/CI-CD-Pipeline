@@ -35,3 +35,9 @@ jobs:
         with:
           name: pytest-test-report
           path: report.html
+  deploy:
+    needs: test # This tells GitHub: "Only run deploy AFTER test succeeds"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Simulated Deployment Step
+        run: echo "Tests passed, now deploying!"
