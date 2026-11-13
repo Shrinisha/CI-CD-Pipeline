@@ -1,4 +1,4 @@
-name: Python CI with Pytest
+name: Pytest CI/CD Pipeline
 
 on:
   push:
@@ -11,22 +11,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Download your code onto the GitHub runner
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Install Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      # 3. Install dependencies and pytest
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 4. Run pytest
-      - name: Run pytest
-        run: pytest
+      # 1. Run pytest and generate an HTML report
+      - name: Run pytest with HTML report
+        run: pytest --html=report.html --self-contained-html
+
+      # 2. CD Step: Automatically upload the test report as a downloadable artifact
+      - name: Upload Test Report Artifact
+        uses: actions/upload-artifact@v4
+        if: always() # Ensures the report is uploaded even if some tests fail!
+        with:
+          name: pytest-test-report
+          path: report.html
