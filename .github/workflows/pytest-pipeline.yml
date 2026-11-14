@@ -9,35 +9,34 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+        run: pip install -r requirements.txt
 
-      # 1. Run pytest and generate an HTML report
       - name: Run pytest with HTML report
-        run: pytest --html=report.html --self-contained-html
+        run: pytest --html=report-${{ matrix.python-version }}.html --self-contained-html
 
-      # 2. CD Step: Automatically upload the test report as a downloadable artifact
       - name: Upload Test Report Artifact
         uses: actions/upload-artifact@v4
-        if: always() # Ensures the report is uploaded even if some tests fail!
         with:
-          name: pytest-test-report
-          path: report.html
+          name: pytest-report-python-${{ matrix.python-version }}
+          path: report-${{ matrix.python-version }}.html
+
   deploy:
-    needs: test # This tells GitHub: "Only run deploy AFTER test succeeds"
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Simulated Deployment Step
-        run: echo "Tests passed, now deploying!"
+        run: echo "All Python versions passed! Deploying now..."
